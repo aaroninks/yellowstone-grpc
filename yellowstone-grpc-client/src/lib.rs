@@ -33,7 +33,7 @@ pub struct InterceptorXToken {
 impl Interceptor for InterceptorXToken {
     fn call(&mut self, mut request: Request<()>) -> Result<Request<()>, Status> {
         if let Some(x_token) = self.x_token.clone() {
-            request.metadata_mut().insert("x-token", x_token);
+            request.metadata_mut().insert("x-access-token", x_token);
         }
         if self.x_request_snapshot {
             request
@@ -199,7 +199,7 @@ impl<F: Interceptor> GeyserGrpcClient<F> {
 
 #[derive(Debug, thiserror::Error)]
 pub enum GeyserGrpcBuilderError {
-    #[error("Failed to parse x-token: {0}")]
+    #[error("Failed to parse x-access-token: {0}")]
     MetadataValueError(#[from] InvalidMetadataValue),
     #[error("gRPC transport error: {0}")]
     TonicError(#[from] tonic::transport::Error),
@@ -280,7 +280,7 @@ impl GeyserGrpcBuilder {
         self.build(channel)
     }
 
-    // Set x-token
+    // Set x-access-token
     pub fn x_token<T>(self, x_token: Option<T>) -> GeyserGrpcBuilderResult<Self>
     where
         T: TryInto<AsciiMetadataValue, Error = InvalidMetadataValue>,
